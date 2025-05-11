@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>震动服务器测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>震动服务器测试工具</h1>
+    
+    <div class="container">
+        <div class="card">
+            <h2>发送震动模式</h2>
+            <div class="form-group">
+                <label for="pattern">选择震动模式：</label>
+                <select id="pattern">
+                    <option value="single">单次震动</option>
+                    <option value="double">两次震动</option>
+                    <option value="long_short">一长一短</option>
+                </select>
+            </div>
+            <button onclick="sendVibration()">发送震动</button>
+            <div id="sendResult" style="margin-top: 10px;"></div>
+        </div>
+        
+        <div class="card">
+            <h2>接收最新震动模式</h2>
+            <button onclick="receiveVibration()">检查最新震动</button>
+            <div id="receiveResult" style="margin-top: 10px;"></div>
+        </div>
+        
+        <div class="card">
+            <h2>使用说明</h2>
+            <p>此工具用于测试震动服务器的功能是否正常工作。</p>
+            <ol>
+                <li>确保已经在服务器上正确配置了PHP脚本和数据库</li>
+                <li>修改下方的服务器URL为您的实际服务器地址</li>
+                <li>使用"发送震动模式"来模拟发送端应用的行为</li>
+                <li>使用"接收最新震动模式"来模拟接收端应用的行为</li>
+            </ol>
+            <p><strong>注意：</strong>请在下方的JavaScript代码中修改服务器URL</p>
+        </div>
+    </div>
+
+    <script>
+        // 服务器URL，需要替换为实际的服务器地址
+        const SERVER_BASE_URL = "http://your-server-url/vibration_server.php";
+        
+        // 发送震动模式
+        async function sendVibration() {
+            const pattern = document.getElementById('pattern').value;
+            const resultElement = document.getElementById('sendResult');
+            
+            try {
+                resultElement.innerHTML = "发送中...";
+                
+                const response = await fetch(`${SERVER_BASE_URL}?action=send`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ pattern: pattern })
+                });
+                
+                const data = await response.json();
+                resultElement.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                resultElement.innerHTML = `<p style="color: red;">错误: ${error.message}</p>`;
+            }
+        }
+        
+        // 接收最新震动模式
+        async function receiveVibration() {
+            const resultElement = document.getElementById('receiveResult');
+            
+            try {
+                resultElement.innerHTML = "接收中...";
+                
+                const response = await fetch(`${SERVER_BASE_URL}?action=receive`);
+                const data = await response.json();
+                
+                resultElement.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                resultElement.innerHTML = `<p style="color: red;">错误: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
